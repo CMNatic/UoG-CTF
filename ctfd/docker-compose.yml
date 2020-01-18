@@ -1,0 +1,105 @@
+
+#  Docker API URL
+# unix:///var/run/docker.sock
+
+# Frp API IP & Port
+# 172.22.0.2:7400
+
+
+# Frp Direct IP Address
+# 192.168.0.37
+
+#Frp Direct Minimum Port
+# 28000
+# 29000
+
+
+# [common]
+#server_addr = 172.17.0.1
+#server_port = 7897
+#token= <TOKEN>
+#admin_addr = 172.22.0.2
+#admin_port = 7400
+#log_file = ./frps.log
+
+# Docker Auto Connect Network
+# ctfd_frp-containers
+
+
+version: '2'
+
+services:
+  ctfd:
+    build: .
+    user: root
+    restart: always
+    ports:
+      - "3000:8000"
+    environment:
+      - UPLOAD_FOLDER=/var/uploads
+      - DATABASE_URL=mysql+pymysql://root:ctfd@db/ctfd
+      - REDIS_URL=redis://cache:6379
+      - WORKERS=1
+      - LOG_FOLDER=/var/log/CTFd
+      - ACCESS_LOG=-
+      - ERROR_LOG=-
+    volumes:
+      - .data/CTFd/logs:/var/log/CTFd
+      - .data/CTFd/uploads:/var/uploads
+      - .:/opt/CTFd:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - db
+    networks:
+        default:
+        internal:
+        frpcadmin:
+            ipv4_address: 172.22.0.3        
+
+  db:
+    image: mariadb:10.4
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=ctfd
+      - MYSQL_USER=ctfd
+      - MYSQL_PASSWORD=ctfd
+      - MYSQL_DATABASE=ctfd
+    volumes:
+      - .data/mysql:/var/lib/mysql
+    networks:
+        internal:
+       
+    # This command is required to set important mariadb defaults
+    command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]
+
+  cache:
+    image: redis:4
+    restart: always
+    volumes:
+    - .data/redis:/data
+    networks:
+        internal:
+  frpc:
+    image: glzjin/frp:latest
+    restart: always
+    volumes:
+      - ./frp/frpc.ini:/etc/frp/frpc.ini
+    networks:
+        frpcadmin:
+            ipv4_address: 172.22.0.2
+        frp-containers:
+networks:
+    default:
+    internal:
+        internal: true
+    frpcadmin:
+        driver: bridge
+        internal: true
+        ipam:
+            config:
+                - subnet: 172.22.0.0/16
+    frp-containers:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.21.0.0/16
