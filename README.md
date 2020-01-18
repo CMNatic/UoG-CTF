@@ -5,6 +5,10 @@
 
 > I started this because running a CTF in the Cloud is super expensive (atleast with my budgeting), where you'd have to deploy multiple instances e.g. EC2 on AWS for a some-what feasible CTF. This is designed to be able to run off of one/two machines, but still retain the attractiveness of Users logging into shells.
 
+ ~CMNatic https://blog.cmnatic.co.uk 
+
+## Types of Containers
+[Can be found on my DockerHub Profile](https://hub.docker.com/u/cmnatic)
 
 ## Current Features
 > Dynamic-Docker Challenges can be deloyed at the click of a button by the User to solve the challenge. 
