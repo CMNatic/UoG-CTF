@@ -28,3 +28,8 @@
 ## Installation
 
 > All Docker deployable, at the moment, its a bit of a pain - but an easier way will be produced **eventually**
+
+
+
+## Dockerfiles:
+ - CVE-2019-14287 - Privilege escalation via sudoers
